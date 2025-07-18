@@ -12,6 +12,10 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.firebase
+backend/.env.firebase
+backend/.env.production
+backend/.env.*
 
 # Native
 .kotlin/

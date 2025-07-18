@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { isFirebaseEnvironment, validateSecrets } from './config/secrets';
 import { connectDB } from './db';
 import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
@@ -10,7 +11,10 @@ import filmRoutes from './routes/films';
 import userRoutes from './routes/users';
 import watchlistRoutes from './routes/watchlist';
 
-dotenv.config();
+// Load environment variables only in non-Firebase environments
+if (!isFirebaseEnvironment()) {
+  dotenv.config();
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,9 +40,13 @@ app.get('/api/health', (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
-// Start server
+// Start server (only in non-serverless environments)
 const startServer = async () => {
   try {
+    // Validate configuration first
+    const config = validateSecrets();
+    console.log('✅ Configuration validated');
+    
     await connectDB();
     
     // Run migrations in development (with error handling)
@@ -52,17 +60,29 @@ const startServer = async () => {
       }
     }
     
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📱 Environment: ${process.env.NODE_ENV}`);
-      console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-    });
+    // Only start server if not in Firebase Functions environment
+    if (!process.env.FUNCTION_NAME) {
+      app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📱 Environment: ${process.env.NODE_ENV}`);
+        console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+        console.log(`🔐 Security: Configuration loaded securely`);
+      });
+    }
   } catch (error) {
     console.error('Failed to start server:', error);
-    process.exit(1);
+    if (!process.env.FUNCTION_NAME) {
+      process.exit(1);
+    }
   }
 };
 
-startServer();
+// Initialize database connection
+connectDB().catch(console.error);
+
+// Only start server if not in Firebase Functions
+if (!process.env.FUNCTION_NAME) {
+  startServer();
+}
 
 export default app;

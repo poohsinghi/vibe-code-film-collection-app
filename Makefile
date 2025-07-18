@@ -1,6 +1,6 @@
 # Film Collection App - Development Commands
 
-.PHONY: install build up down logs clean setup fresh migrate help
+.PHONY: install build up down logs clean setup fresh migrate help firebase-deploy firebase-serve lint lint-fix
 
 # Default target
 help:
@@ -25,6 +25,18 @@ help:
 	@echo "🏗️ Production:"
 	@echo "  build       - Build production containers"
 	@echo "  up          - Start production environment"
+	@echo ""
+	@echo "🔥 Firebase:"
+	@echo "  firebase-init     - Initialize Firebase project"
+	@echo "  firebase-serve    - Run Firebase emulators locally"
+	@echo "  firebase-deploy   - Deploy to Firebase"
+	@echo "  firebase-logs     - View Firebase function logs"
+	@echo "  firebase-config   - Set secrets securely (interactive)"
+	@echo "  firebase-config-show - View current configuration"
+	@echo ""
+	@echo "🔍 Code Quality:"
+	@echo "  lint             - Run ESLint on backend code"
+	@echo "  lint-fix         - Fix ESLint issues automatically"
 
 # Installation and Setup
 install:
@@ -130,3 +142,57 @@ db-reset:
 		docker compose up -d db && \
 		echo "✅ Database reset complete!"; \
 	fi
+
+# Firebase deployment commands
+firebase-init:
+	@echo "🔥 Installing Firebase CLI and initializing project..."
+	npm install -g firebase-tools
+	firebase login
+	firebase init
+
+firebase-serve:
+	@echo "🔥 Starting Firebase emulators..."
+	cd backend && npm install
+	firebase emulators:start
+
+firebase-deploy:
+	@echo "🔥 Deploying to Firebase..."
+	cd backend && npm run build
+	firebase deploy --only functions
+
+firebase-logs:
+	@echo "📜 Viewing Firebase function logs..."
+	firebase functions:log
+
+firebase-config:
+	@echo "� Setting up Firebase environment variables securely..."
+	@echo "⚠️  This will prompt you to enter sensitive values securely"
+	@echo ""
+	@echo "Setting JWT Secret..."
+	@read -s -p "Enter JWT Secret (hidden): " jwt_secret && \
+	firebase functions:config:set app.jwt_secret="$$jwt_secret"
+	@echo ""
+	@echo "Setting Database URL..."
+	@read -s -p "Enter Database URL (hidden): " db_url && \
+	firebase functions:config:set app.database_url="$$db_url"
+	@echo ""
+	@echo "Setting OMDB API Key (optional)..."
+	@read -p "Enter OMDB API Key (or press Enter to skip): " omdb_key && \
+	if [ ! -z "$$omdb_key" ]; then firebase functions:config:set app.omdb_api_key="$$omdb_key"; fi
+	@echo "Setting TMDB API Key (optional)..."
+	@read -p "Enter TMDB API Key (or press Enter to skip): " tmdb_key && \
+	if [ ! -z "$$tmdb_key" ]; then firebase functions:config:set app.tmdb_api_key="$$tmdb_key"; fi
+	@echo "✅ Configuration set securely!"
+
+firebase-config-show:
+	@echo "🔍 Current Firebase configuration:"
+	firebase functions:config:get
+
+# Code quality commands
+lint:
+	@echo "🔍 Running ESLint on backend code..."
+	cd backend && npm run lint
+
+lint-fix:
+	@echo "🔧 Fixing ESLint issues automatically..."
+	cd backend && npm run lint:fix

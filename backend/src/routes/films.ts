@@ -9,9 +9,9 @@ const router = Router();
 // Search films from OMDB/TMDB
 router.get('/search', async (req: Request, res: Response) => {
   try {
-    const { query, page = 1 } = req.query;
+    const { q, page = 1 } = req.query;
 
-    if (!query) {
+    if (!q) {
       return res.status(400).json({ error: 'Search query is required' });
     }
 
@@ -19,8 +19,8 @@ router.get('/search', async (req: Request, res: Response) => {
     const omdbResponse = await axios.get('http://www.omdbapi.com/', {
       params: {
         apikey: process.env.OMDB_API_KEY,
-        s: query,
-        page,
+        s: q,
+        page: 1,
         type: 'movie'
       }
     });
@@ -28,6 +28,7 @@ router.get('/search', async (req: Request, res: Response) => {
     if (omdbResponse.data.Response === 'False') {
       return res.json({ films: [], totalResults: 0 });
     }
+      console.log("🚀Harrison ~ router.get ~ omdbResponse:", omdbResponse)
 
     const films = omdbResponse.data.Search.map((film: any) => ({
       imdbId: film.imdbID,

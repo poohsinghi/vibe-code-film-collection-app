@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
-import {
-    ActivityIndicator,
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useWatchlist } from '../../hooks/useWatchlist';
 import { useAuthStore } from '../../store/authStore';
 
@@ -46,20 +40,27 @@ export const WatchlistScreen: React.FC = () => {
   };
 
   const renderWatchlistItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.watchlistItem}>
-      <View style={styles.filmPoster}>
-        <Text style={styles.posterPlaceholder}>🎬</Text>
+    <TouchableOpacity className="flex-row bg-white rounded-lg p-4 mb-3 shadow-sm">
+      <View className="w-16 h-20 bg-gray-200 rounded-lg items-center justify-center mr-3">
+        <Text className="text-2xl">🎬</Text>
       </View>
-      <View style={styles.filmInfo}>
-        <Text style={styles.filmTitle}>{item.film?.title || 'Unknown Title'}</Text>
-        <Text style={styles.filmYear}>{item.film?.year}</Text>
-        <View style={styles.statusContainer}>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-            <Text style={styles.statusText}>{getStatusText(item.status)}</Text>
+      <View className="flex-1">
+        <Text className="text-lg font-semibold text-gray-900 mb-1">
+          {item.film?.title || 'Unknown Title'}
+        </Text>
+        <Text className="text-sm text-gray-600 mb-2">{item.film?.year}</Text>
+        <View className="flex-row">
+          <View 
+            className="px-2 py-1 rounded-full"
+            style={{ backgroundColor: getStatusColor(item.status) }}
+          >
+            <Text className="text-white text-xs font-medium">
+              {getStatusText(item.status)}
+            </Text>
           </View>
         </View>
         {item.userRating && (
-          <Text style={styles.rating}>Rating: {item.userRating}/10</Text>
+          <Text className="text-sm text-gray-600 mt-1">Rating: {item.userRating}/10</Text>
         )}
       </View>
     </TouchableOpacity>
@@ -67,16 +68,16 @@ export const WatchlistScreen: React.FC = () => {
 
   const renderFilterButton = (filterType: typeof filter, label: string) => (
     <TouchableOpacity
-      style={[
-        styles.filterButton,
-        filter === filterType && styles.activeFilterButton
-      ]}
+      className={`px-3 py-2 rounded-full border ${
+        filter === filterType 
+          ? 'bg-blue-500 border-blue-500' 
+          : 'bg-white border-gray-300'
+      }`}
       onPress={() => setFilter(filterType)}
     >
-      <Text style={[
-        styles.filterButtonText,
-        filter === filterType && styles.activeFilterButtonText
-      ]}>
+      <Text className={`text-sm font-medium ${
+        filter === filterType ? 'text-white' : 'text-gray-700'
+      }`}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -84,26 +85,26 @@ export const WatchlistScreen: React.FC = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.centerContainer}>
+      <SafeAreaView className="flex-1 justify-center items-center bg-gray-50">
         <ActivityIndicator size="large" color="#3b82f6" />
-        <Text style={styles.loadingText}>Loading watchlist...</Text>
-      </View>
+        <Text className="mt-2 text-gray-600">Loading watchlist...</Text>
+      </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Error loading watchlist</Text>
-      </View>
+      <SafeAreaView className="flex-1 justify-center items-center bg-gray-50">
+        <Text className="text-red-500">Error loading watchlist</Text>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>My Watchlist</Text>
-        <View style={styles.filterContainer}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="p-4 bg-white border-b border-gray-200">
+        <Text className="text-2xl font-bold text-gray-900 mb-4">My Watchlist</Text>
+        <View className="flex-row space-x-2">
           {renderFilterButton('all', 'All')}
           {renderFilterButton('want_to_watch', 'Want to Watch')}
           {renderFilterButton('currently_watching', 'Watching')}
@@ -112,8 +113,8 @@ export const WatchlistScreen: React.FC = () => {
       </View>
 
       {filteredWatchlist.length === 0 ? (
-        <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>
+        <View className="flex-1 justify-center items-center p-8">
+          <Text className="text-gray-500 text-center text-base">
             {filter === 'all' 
               ? 'Your watchlist is empty. Start adding some films!'
               : `No films in ${getStatusText(filter)} category`
@@ -125,136 +126,12 @@ export const WatchlistScreen: React.FC = () => {
           data={filteredWatchlist}
           renderItem={renderWatchlistItem}
           keyExtractor={(item) => item.id.toString()}
-          style={styles.watchlistList}
+          className="flex-1"
+          contentContainerStyle={{ padding: 16 }}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  header: {
-    padding: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 16,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  filterButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#f3f4f6',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-  },
-  activeFilterButton: {
-    backgroundColor: '#3b82f6',
-    borderColor: '#3b82f6',
-  },
-  filterButtonText: {
-    fontSize: 12,
-    color: '#6b7280',
-    fontWeight: '500',
-  },
-  activeFilterButtonText: {
-    color: 'white',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  loadingText: {
-    marginTop: 12,
-    color: '#6b7280',
-    fontSize: 16,
-  },
-  errorText: {
-    color: '#ef4444',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  emptyText: {
-    color: '#6b7280',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  watchlistList: {
-    flex: 1,
-  },
-  watchlistItem: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: 'white',
-    marginHorizontal: 16,
-    marginVertical: 4,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  filmPoster: {
-    width: 60,
-    height: 90,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  posterPlaceholder: {
-    fontSize: 24,
-  },
-  filmInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  filmTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-  filmYear: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 8,
-  },
-  statusContainer: {
-    marginBottom: 4,
-  },
-  statusBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 12,
-    color: 'white',
-    fontWeight: '500',
-  },
-  rating: {
-    fontSize: 12,
-    color: '#f59e0b',
-    fontWeight: '500',
-  },
-});
+

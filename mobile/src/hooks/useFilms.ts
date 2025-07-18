@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../services/api';
 import { queryKeys } from '../services/queryClient';
-import { Film } from '../store/filmStore';
+import { Film, FilmResponse } from '../store/filmStore';
 
 // Film API functions
 const filmApi = {
-  searchFilms: async (query: string): Promise<Film[]> => {
+  searchFilms: async (query: string): Promise<FilmResponse> => {
     const response = await api.get(`/films/search?q=${encodeURIComponent(query)}`);
     return response.data;
   },

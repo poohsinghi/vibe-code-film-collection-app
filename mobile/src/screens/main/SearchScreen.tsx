@@ -1,183 +1,134 @@
-import React, { useState } from 'react';
-import {
-    ActivityIndicator,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { useSearchFilms } from '../../hooks/useFilms';
-import { useFilmStore } from '../../store/filmStore';
+import React, { useState } from "react";
+import { ActivityIndicator, Alert, FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useSearchFilms } from "../../hooks/useFilms";
+import { useAuthStore } from "../../store/authStore";
+import { Film, useFilmStore } from "../../store/filmStore";
 
 export const SearchScreen: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTrigger, setSearchTrigger] = useState("");
   const { searchResults, setSearchResults } = useFilmStore();
-  
-  const { data: films, isLoading, error } = useSearchFilms(searchQuery, searchQuery.length > 2);
+  const { isAuthenticated } = useAuthStore();
+
+  const { data: filmsRes, isLoading, error } = useSearchFilms(searchTrigger, searchTrigger.length > 0);
 
   React.useEffect(() => {
-    if (films) {
-      setSearchResults(films);
+    if (filmsRes) {
+      setSearchResults(filmsRes.films);
     }
-  }, [films, setSearchResults]);
+  }, [filmsRes, setSearchResults]);
 
-  const renderFilmItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.filmItem}>
-      <View style={styles.filmPoster}>
-        <Text style={styles.posterPlaceholder}>📽️</Text>
+  const handleSearch = () => {
+    if (searchQuery.trim().length > 2) {
+      setSearchTrigger(searchQuery.trim());
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setSearchTrigger("");
+    setSearchResults([]);
+  };
+
+  const handleAddToWatchlist = (film: any) => {
+    if (!isAuthenticated) {
+      Alert.alert("Login Required", "Please login to add films to your watchlist", [{ text: "OK" }]);
+      return;
+    }
+    // Add to watchlist logic here
+  };
+
+  const renderFilmItem = ({ item }: { item: Film }) => {
+    return (
+      <View className=" bg-white rounded-lg p-4 mb-3 shadow-sm  w-full">
+        <View className="w-16 h-20  rounded-lg items-center justify-center mr-3">
+          <Text className="text-2xl">📽️</Text>
+        </View>
+        <View className="flex-1">
+          <Text className="text-lg font-semibold text-gray-900 mb-1">{item.title}</Text>
+          <Text className="text-sm text-gray-600 mb-1">{item.year}</Text>
+          <Text className="text-sm text-gray-500">{item.genre}</Text>
+        </View>
       </View>
-      <View style={styles.filmInfo}>
-        <Text style={styles.filmTitle}>{item.title}</Text>
-        <Text style={styles.filmYear}>{item.year}</Text>
-        <Text style={styles.filmGenre}>{item.genre}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search for films..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-        />
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="p-4 bg-white border-b border-gray-200">
+        <View className="flex-row gap-2">
+          <View className="flex-1 relative">
+            <TextInput
+              className="border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 text-base pr-10"
+              placeholder="Search for films..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              onSubmitEditing={handleSearch}
+              returnKeyType="search"
+            />
+            {(searchQuery.length > 0 || searchTrigger.length > 0) && (
+              <TouchableOpacity
+                className="absolute right-2 top-3 w-6 h-6 bg-gray-400 rounded-full items-center justify-center"
+                onPress={handleClearSearch}
+              >
+                <Text className="text-white text-xs font-bold">×</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <TouchableOpacity
+            className={`px-4 py-3 rounded-lg justify-center items-center min-w-[70px] ${
+              searchQuery.trim().length > 2 ? "bg-blue-500" : "bg-gray-300"
+            }`}
+            onPress={handleSearch}
+            disabled={searchQuery.trim().length <= 2}
+          >
+            <Text className={`font-semibold ${searchQuery.trim().length > 2 ? "text-white" : "text-gray-500"}`}>
+              Search
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {isLoading && (
-        <View style={styles.centerContainer}>
+        <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#3b82f6" />
-          <Text style={styles.loadingText}>Searching films...</Text>
+          <Text className="mt-2 text-gray-600">Searching films...</Text>
         </View>
       )}
 
       {error && (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>Error searching films</Text>
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-red-500 text-center">Error searching films</Text>
         </View>
       )}
 
-      {!isLoading && !error && searchQuery.length > 2 && searchResults.length === 0 && (
-        <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>No films found</Text>
+      {!isLoading && !error && searchTrigger.length > 0 && searchResults.length === 0 && (
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-gray-500 text-center">No films found for "{searchTrigger}"</Text>
         </View>
       )}
 
-      {!isLoading && searchResults.length > 0 && (
+      {!isLoading && (
         <FlatList
           data={searchResults}
           renderItem={renderFilmItem}
           keyExtractor={(item, index) => `${item.id || index}`}
-          style={styles.filmList}
+          className="flex-1"
+          contentContainerStyle={{ paddingHorizontal: 16 }}
         />
       )}
 
-      {searchQuery.length <= 2 && (
-        <View style={styles.centerContainer}>
-          <Text style={styles.instructionText}>
-            Type at least 3 characters to search for films
+      {searchTrigger.length === 0 && (
+        <View className="flex-1 justify-center items-center px-8">
+          <Text className="text-4xl mb-4">🎬</Text>
+          <Text className="text-xl font-semibold text-gray-900 mb-2 text-center">Search for Films</Text>
+          <Text className="text-base text-gray-600 text-center leading-6">
+            Enter a film title and press the Search button
           </Text>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  searchContainer: {
-    padding: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  searchInput: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#f9fafb',
-    fontSize: 16,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  loadingText: {
-    marginTop: 12,
-    color: '#6b7280',
-    fontSize: 16,
-  },
-  errorText: {
-    color: '#ef4444',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  emptyText: {
-    color: '#6b7280',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  instructionText: {
-    color: '#6b7280',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  filmList: {
-    flex: 1,
-  },
-  filmItem: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: 'white',
-    marginHorizontal: 16,
-    marginVertical: 4,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  filmPoster: {
-    width: 60,
-    height: 90,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  posterPlaceholder: {
-    fontSize: 24,
-  },
-  filmInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  filmTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-  filmYear: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 2,
-  },
-  filmGenre: {
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-});

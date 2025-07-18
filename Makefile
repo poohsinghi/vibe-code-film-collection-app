@@ -27,7 +27,7 @@ help:
 # Development environment
 dev:
 	@echo "🚀 Starting development environment..."
-	@docker-compose -f docker-compose.dev.yml up -d --build
+	@docker compose -f docker-compose.dev.yml up -d --build
 	@echo "✅ Development environment started!"
 	@echo "   - Backend API: http://localhost:3000"
 	@echo "   - Database Admin: http://localhost:8080"
@@ -35,51 +35,51 @@ dev:
 # Production environment
 prod:
 	@echo "🚀 Starting production environment..."
-	@docker-compose up -d --build
+	@docker compose up -d --build
 
 # Build images
 build:
 	@echo "🔨 Building Docker images..."
-	@docker-compose build
+	@docker compose build
 
 # View logs
 logs:
-	@docker-compose -f docker-compose.dev.yml logs -f
+	@docker compose -f docker-compose.dev.yml logs -f
 
 backend-logs:
-	@docker-compose -f docker-compose.dev.yml logs -f backend
+	@docker compose -f docker-compose.dev.yml logs -f backend
 
 # Stop containers
 stop:
 	@echo "🛑 Stopping containers..."
-	@docker-compose -f docker-compose.dev.yml down
+	@docker compose -f docker-compose.dev.yml down
 
 # Clean up
 clean:
 	@echo "🧹 Cleaning up containers and volumes..."
-	@docker-compose -f docker-compose.dev.yml down -v
+	@docker compose -f docker-compose.dev.yml down -v
 	@docker system prune -f
 
 # Database shell
 db-shell:
 	@echo "📊 Connecting to database..."
-	@docker-compose -f docker-compose.dev.yml exec db psql -U filmuser -d film_collection_db
+	@docker compose -f docker-compose.dev.yml exec db psql -U filmuser -d film_collection_db
 
 # Reset database
 db-reset:
 	@echo "⚠️  WARNING: This will destroy all database data!"
 	@read -p "Are you sure? [y/N] " -n 1 -r && echo && \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		docker-compose -f docker-compose.dev.yml down -v && \
-		docker-compose -f docker-compose.dev.yml up -d db && \
+		docker compose -f docker-compose.dev.yml down -v && \
+		docker compose -f docker-compose.dev.yml up -d db && \
 		echo "✅ Database reset complete!"; \
 	fi
 
 # Backend shell
 backend-shell:
 	@echo "🖥️  Connecting to backend container..."
-	@docker-compose -f docker-compose.dev.yml exec backend sh
+	@docker compose -f docker-compose.dev.yml exec backend sh
 
 # Check service status
 status:
-	@docker-compose -f docker-compose.dev.yml ps
+	@docker compose -f docker-compose.dev.yml ps

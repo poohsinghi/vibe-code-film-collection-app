@@ -263,7 +263,7 @@ Update `.env` with production values:
 make backend-logs
 
 # Restart backend only
-docker-compose -f docker-compose.dev.yml restart backend
+docker compose -f docker-compose.dev.yml restart backend
 
 # Check database connection
 make db-shell

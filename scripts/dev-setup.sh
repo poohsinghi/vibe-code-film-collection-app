@@ -25,7 +25,7 @@ fi
 
 # Build and start services
 echo "🐳 Building and starting Docker containers..."
-docker-compose -f docker-compose.dev.yml up --build -d
+docker compose -f docker-compose.dev.yml up --build -d
 
 # Wait for database to be ready
 echo "⏳ Waiting for database to be ready..."
@@ -33,7 +33,7 @@ sleep 10
 
 # Check if services are healthy
 echo "🔍 Checking service health..."
-docker-compose -f docker-compose.dev.yml ps
+docker compose -f docker-compose.dev.yml ps
 
 echo ""
 echo "✅ Development environment is ready!"
@@ -44,8 +44,8 @@ echo "   - API Health: http://localhost:3000/api/health"
 echo "   - Database Admin: http://localhost:8080"
 echo "     (Server: db, Username: filmuser, Password: filmpass123)"
 echo ""
-echo "🛠️  To view logs: docker-compose -f docker-compose.dev.yml logs -f"
-echo "🛑 To stop: docker-compose -f docker-compose.dev.yml down"
+echo "🛠️  To view logs: docker compose -f docker-compose.dev.yml logs -f"
+echo "🛑 To stop: docker compose -f docker-compose.dev.yml down"
 echo ""
 echo "🔧 Now start your mobile app:"
 echo "   cd mobile && npx expo start"

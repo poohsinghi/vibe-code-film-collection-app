@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLogout } from '../../hooks/useAuth';
 import { useAuthStore } from '../../store/authStore';
 
@@ -30,32 +30,33 @@ export const ProfileScreen: React.FC = () => {
   };
 
   const ProfileSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+    <View className="bg-white mx-4 mb-4 rounded-lg p-4 shadow-sm">
+      <Text className="text-lg font-semibold text-gray-900 mb-3">{title}</Text>
       {children}
     </View>
   );
 
   const ProfileItem = ({ label, value }: { label: string; value: string }) => (
-    <View style={styles.profileItem}>
-      <Text style={styles.profileLabel}>{label}</Text>
-      <Text style={styles.profileValue}>{value}</Text>
+    <View className="flex-row justify-between items-center py-2">
+      <Text className="text-gray-600 font-medium">{label}</Text>
+      <Text className="text-gray-900">{value}</Text>
     </View>
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </Text>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <ScrollView className="flex-1">
+        <View className="bg-white pt-8 pb-6 px-4 items-center border-b border-gray-200">
+          <View className="mb-4">
+            <View className="w-20 h-20 bg-blue-500 rounded-full items-center justify-center">
+              <Text className="text-white text-2xl font-bold">
+                {user?.name?.charAt(0).toUpperCase() || 'U'}
+              </Text>
+            </View>
           </View>
+          <Text className="text-xl font-bold text-gray-900">{user?.name}</Text>
+          <Text className="text-gray-500">{user?.email}</Text>
         </View>
-        <Text style={styles.userName}>{user?.name}</Text>
-        <Text style={styles.userEmail}>{user?.email}</Text>
-      </View>
 
       <ProfileSection title="Account Information">
         <ProfileItem label="Name" value={user?.name || 'N/A'} />
@@ -66,173 +67,49 @@ export const ProfileScreen: React.FC = () => {
         />
       </ProfileSection>
 
-      <ProfileSection title="Preferences">
-        <View style={styles.profileItem}>
-          <Text style={styles.profileLabel}>Favorite Genres</Text>
-          <View style={styles.genreContainer}>
-            {user?.favoriteGenres && user.favoriteGenres.length > 0 ? (
-              user.favoriteGenres.map((genre, index) => (
-                <View key={index} style={styles.genreBadge}>
-                  <Text style={styles.genreText}>{genre}</Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.profileValue}>None selected</Text>
-            )}
+        <ProfileSection title="Preferences">
+          <View className="py-2">
+            <Text className="text-gray-600 font-medium mb-2">Favorite Genres</Text>
+            <View className="flex-row flex-wrap gap-2">
+              {user?.favoriteGenres && user.favoriteGenres.length > 0 ? (
+                user.favoriteGenres.map((genre, index) => (
+                  <View key={index} className="bg-blue-100 px-3 py-1 rounded-full">
+                    <Text className="text-blue-800 text-sm font-medium">{genre}</Text>
+                  </View>
+                ))
+              ) : (
+                <Text className="text-gray-900">None selected</Text>
+              )}
+            </View>
           </View>
+        </ProfileSection>
+
+        <ProfileSection title="Statistics">
+          <ProfileItem label="Films Watched" value="0" />
+          <ProfileItem label="Hours Watched" value="0" />
+          <ProfileItem label="Average Rating" value="N/A" />
+        </ProfileSection>
+
+        <View className="mx-4 mb-8">
+          <TouchableOpacity className="bg-blue-500 py-3 px-4 rounded-lg mb-3">
+            <Text className="text-white text-center font-semibold">Edit Profile</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity className="bg-gray-100 py-3 px-4 rounded-lg mb-3">
+            <Text className="text-gray-700 text-center font-semibold">Settings</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            className="bg-red-500 py-3 px-4 rounded-lg"
+            onPress={handleLogout}
+            disabled={logoutMutation.isPending}
+          >
+            <Text className="text-white text-center font-semibold">
+              {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
+            </Text>
+          </TouchableOpacity>
         </View>
-      </ProfileSection>
-
-      <ProfileSection title="Statistics">
-        <ProfileItem label="Films Watched" value="0" />
-        <ProfileItem label="Hours Watched" value="0" />
-        <ProfileItem label="Average Rating" value="N/A" />
-      </ProfileSection>
-
-      <View style={styles.actionSection}>
-        <TouchableOpacity style={styles.editButton}>
-          <Text style={styles.editButtonText}>Edit Profile</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.settingsButton}>
-          <Text style={styles.settingsButtonText}>Settings</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          disabled={logoutMutation.isPending}
-        >
-          <Text style={styles.logoutButtonText}>
-            {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  header: {
-    backgroundColor: 'white',
-    alignItems: 'center',
-    paddingVertical: 32,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  avatarContainer: {
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#3b82f6',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 16,
-    color: '#6b7280',
-  },
-  section: {
-    backgroundColor: 'white',
-    marginTop: 16,
-    paddingVertical: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  profileItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-  },
-  profileLabel: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 4,
-  },
-  profileValue: {
-    fontSize: 16,
-    color: '#1f2937',
-  },
-  genreContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 8,
-  },
-  genreBadge: {
-    backgroundColor: '#eff6ff',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginRight: 8,
-    marginBottom: 4,
-  },
-  genreText: {
-    fontSize: 12,
-    color: '#3b82f6',
-    fontWeight: '500',
-  },
-  actionSection: {
-    padding: 16,
-    marginTop: 16,
-  },
-  editButton: {
-    backgroundColor: '#3b82f6',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  editButtonText: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  settingsButton: {
-    backgroundColor: '#f3f4f6',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  settingsButtonText: {
-    color: '#1f2937',
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  logoutButton: {
-    backgroundColor: '#ef4444',
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  logoutButtonText: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

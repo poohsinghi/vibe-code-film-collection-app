@@ -5,12 +5,12 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLogin } from '../../hooks/useAuth';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 
@@ -37,18 +37,21 @@ export const LoginScreen: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.content}>
-        <View style={styles.form}>
-          <Text style={styles.title}>Film Collection</Text>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+      >
+        <View className="flex-1 justify-center px-6">
+          <View className="bg-white rounded-lg p-6 shadow-lg">
+          <Text className="text-3xl font-bold text-center mb-8 text-gray-900">
+            Film Collection
+          </Text>
           
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
+          <View className="mb-4">
+            <Text className="text-gray-700 mb-2 text-base">Email</Text>
             <TextInput
-              style={styles.input}
+              className="border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 text-base"
               placeholder="Enter your email"
               value={email}
               onChangeText={setEmail}
@@ -57,10 +60,10 @@ export const LoginScreen: React.FC = () => {
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
+          <View className="mb-4">
+            <Text className="text-gray-700 mb-2 text-base">Password</Text>
             <TextInput
-              style={styles.input}
+              className="border border-gray-300 rounded-lg px-4 py-3 bg-gray-50 text-base"
               placeholder="Enter your password"
               value={password}
               onChangeText={setPassword}
@@ -69,94 +72,26 @@ export const LoginScreen: React.FC = () => {
           </View>
 
           <TouchableOpacity
-            style={[styles.loginButton, loginMutation.isPending && styles.buttonDisabled]}
+            className={`bg-blue-500 rounded-lg py-3 mb-4 ${loginMutation.isPending ? 'opacity-50' : ''}`}
             onPress={handleLogin}
             disabled={loginMutation.isPending}
           >
-            <Text style={styles.loginButtonText}>
+            <Text className="text-white text-center font-semibold text-lg">
               {loginMutation.isPending ? 'Logging in...' : 'Login'}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => navigation.navigate('Register')}
-            style={styles.registerLink}
+            className="py-2"
           >
-            <Text style={styles.registerText}>
+            <Text className="text-blue-500 text-center text-base">
               Don't have an account? Sign up
             </Text>
           </TouchableOpacity>
         </View>
       </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  form: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 32,
-    color: '#1f2937',
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    color: '#374151',
-    marginBottom: 8,
-    fontSize: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#f9fafb',
-    fontSize: 16,
-  },
-  loginButton: {
-    backgroundColor: '#3b82f6',
-    borderRadius: 8,
-    paddingVertical: 12,
-    marginBottom: 16,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  loginButtonText: {
-    color: 'white',
-    textAlign: 'center',
-    fontWeight: '600',
-    fontSize: 18,
-  },
-  registerLink: {
-    paddingVertical: 8,
-  },
-  registerText: {
-    color: '#3b82f6',
-    textAlign: 'center',
-    fontSize: 16,
-  },
-});

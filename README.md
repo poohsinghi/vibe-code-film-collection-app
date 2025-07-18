@@ -89,7 +89,7 @@ A modern mobile application for managing your film collection, built with Expo R
    make dev
    
    # Or using Docker Compose directly
-   docker-compose -f docker-compose.dev.yml up -d --build
+   docker compose -f docker-compose.dev.yml up -d --build
    ```
 
 4. **Start the mobile app**:
@@ -193,12 +193,12 @@ make backend-shell # Connect to backend container
 ### Using Docker Compose Directly
 ```bash
 # Development
-docker-compose -f docker-compose.dev.yml up -d --build
-docker-compose -f docker-compose.dev.yml logs -f
-docker-compose -f docker-compose.dev.yml down
+docker compose -f docker-compose.dev.yml up -d --build
+docker compose -f docker-compose.dev.yml logs -f
+docker compose -f docker-compose.dev.yml down
 
 # Production
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### Available Services

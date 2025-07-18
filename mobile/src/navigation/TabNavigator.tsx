@@ -7,12 +7,15 @@ import { HomeScreen } from '../screens/main/HomeScreen';
 import { ProfileScreen } from '../screens/main/ProfileScreen';
 import { SearchScreen } from '../screens/main/SearchScreen';
 import { WatchlistScreen } from '../screens/main/WatchlistScreen';
+import { useAuthStore } from '../store/authStore';
+import { AuthNavigator } from './AuthNavigator';
 
 export type MainTabParamList = {
   HomeTab: undefined;
   SearchTab: undefined;
   WatchlistTab: undefined;
   ProfileTab: undefined;
+  LoginTab: undefined;
 };
 
 export type RootStackParamList = {
@@ -24,6 +27,8 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 
 const MainTabs: React.FC = () => {
+  const { isAuthenticated } = useAuthStore();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -38,6 +43,8 @@ const MainTabs: React.FC = () => {
             iconName = focused ? 'bookmark' : 'bookmark-outline';
           } else if (route.name === 'ProfileTab') {
             iconName = focused ? 'person' : 'person-outline';
+          } else if (route.name === 'LoginTab') {
+            iconName = isAuthenticated ? 'log-out' : 'log-in';
           } else {
             iconName = 'home-outline';
           }
@@ -59,16 +66,26 @@ const MainTabs: React.FC = () => {
         component={SearchScreen}
         options={{ tabBarLabel: 'Search' }}
       />
-      <Tab.Screen 
-        name="WatchlistTab" 
-        component={WatchlistScreen}
-        options={{ tabBarLabel: 'Watchlist' }}
-      />
-      <Tab.Screen 
-        name="ProfileTab" 
-        component={ProfileScreen}
-        options={{ tabBarLabel: 'Profile' }}
-      />
+      {isAuthenticated ? (
+        <>
+          <Tab.Screen 
+            name="WatchlistTab" 
+            component={WatchlistScreen}
+            options={{ tabBarLabel: 'Watchlist' }}
+          />
+          <Tab.Screen 
+            name="ProfileTab" 
+            component={ProfileScreen}
+            options={{ tabBarLabel: 'Profile' }}
+          />
+        </>
+      ) : (
+        <Tab.Screen 
+          name="LoginTab" 
+          component={AuthNavigator}
+          options={{ tabBarLabel: 'Login' }}
+        />
+      )}
     </Tab.Navigator>
   );
 };

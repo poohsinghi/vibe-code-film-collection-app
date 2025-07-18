@@ -1,6 +1,7 @@
 import { RouteProp } from '@react-navigation/native';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../../navigation/TabNavigator';
 
 type FilmDetailScreenRouteProp = RouteProp<RootStackParamList, 'FilmDetail'>;
@@ -13,36 +14,12 @@ export const FilmDetailScreen: React.FC<Props> = ({ route }) => {
   const { filmId } = route.params;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Film Detail</Text>
-      <Text style={styles.filmId}>Film ID: {filmId}</Text>
-      <Text style={styles.placeholder}>Film details will be implemented here</Text>
-    </View>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="flex-1 justify-center items-center p-4">
+        <Text className="text-2xl font-bold text-gray-900 mb-4">Film Detail</Text>
+        <Text className="text-base text-gray-600 mb-4">Film ID: {filmId}</Text>
+        <Text className="text-sm text-gray-400 text-center">Film details will be implemented here</Text>
+      </View>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 16,
-  },
-  filmId: {
-    fontSize: 16,
-    color: '#6b7280',
-    marginBottom: 16,
-  },
-  placeholder: {
-    fontSize: 14,
-    color: '#9ca3af',
-    textAlign: 'center',
-  },
-});

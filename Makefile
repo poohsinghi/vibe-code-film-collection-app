@@ -1,85 +1,132 @@
-# Film Collection App - Docker Management
+# Film Collection App - Development Commands
 
-.PHONY: help dev prod build stop clean logs db-shell backend-shell
+.PHONY: install build up down logs clean setup fresh migrate help
 
 # Default target
 help:
-	@echo "Film Collection App - Docker Commands"
+	@echo "📚 Film Collection App - Available Commands:"
 	@echo ""
-	@echo "Development:"
-	@echo "  dev        - Start development environment"
-	@echo "  logs       - View application logs"
-	@echo "  stop       - Stop all containers"
-	@echo "  clean      - Stop containers and clean up"
+	@echo "🚀 Setup & Installation:"
+	@echo "  install     - Install dependencies"
+	@echo "  setup       - Setup with existing database"
+	@echo "  fresh       - Fresh installation (removes all data)"
 	@echo ""
-	@echo "Database:"
-	@echo "  db-shell   - Connect to PostgreSQL database"
-	@echo "  db-reset   - Reset database (WARNING: destroys all data)"
+	@echo "🔧 Development:"
+	@echo "  dev         - Start development environment"
+	@echo "  logs        - Show all container logs"
+	@echo "  down        - Stop all services"
+	@echo "  clean       - Clean up containers and volumes"
 	@echo ""
-	@echo "Backend:"
-	@echo "  backend-shell - Connect to backend container shell"
-	@echo "  backend-logs  - View backend logs only"
+	@echo "📋 Database:"
+	@echo "  migrate     - Run database migrations"
+	@echo "  db-shell    - Open database shell"
+	@echo "  db-backup   - Create database backup"
 	@echo ""
-	@echo "Production:"
-	@echo "  prod       - Start production environment"
-	@echo "  build      - Build production images"
+	@echo "🏗️ Production:"
+	@echo "  build       - Build production containers"
+	@echo "  up          - Start production environment"
 
-# Development environment
+# Installation and Setup
+install:
+	@echo "📦 Installing dependencies..."
+	cd frontend && npm install
+	cd backend && npm install
+
+# Setup with existing database
+setup:
+	@echo "🚀 Setting up development environment..."
+	chmod +x setup-drizzle.sh
+	./setup-drizzle.sh
+
+# Fresh installation (removes all data)
+fresh:
+	@echo "🆕 Fresh installation - removing all data..."
+	docker compose down -v
+	docker volume rm vibe-code-app_postgres_data 2>/dev/null || true
+	docker volume rm vibe-code-app_postgres_data_dev 2>/dev/null || true
+	chmod +x setup-drizzle.sh
+	./setup-drizzle.sh
+
+# Development
 dev:
-	@echo "🚀 Starting development environment..."
-	@docker compose -f docker-compose.dev.yml up -d --build
-	@echo "✅ Development environment started!"
-	@echo "   - Backend API: http://localhost:3000"
-	@echo "   - Database Admin: http://localhost:8080"
+	@echo "🔧 Starting development environment..."
+	docker compose -f docker-compose.dev.yml up --build
 
-# Production environment
-prod:
-	@echo "🚀 Starting production environment..."
-	@docker compose up -d --build
-
-# Build images
+# Production
 build:
-	@echo "🔨 Building Docker images..."
-	@docker compose build
+	@echo "🏗️ Building production containers..."
+	docker compose build
 
-# View logs
+up:
+	@echo "🚀 Starting production environment..."
+	docker compose up -d
+
+# Database operations
+migrate:
+	@echo "📋 Running database migrations..."
+	cd backend && npm run db:migrate
+
+migrate-fresh:
+	@echo "🔄 Running fresh migrations..."
+	cd backend && npm run db:drop && npm run db:migrate
+
+# Monitoring
 logs:
-	@docker compose -f docker-compose.dev.yml logs -f
+	@echo "📜 Showing container logs..."
+	docker compose logs -f
 
-backend-logs:
-	@docker compose -f docker-compose.dev.yml logs -f backend
+logs-backend:
+	@echo "📜 Showing backend logs..."
+	docker compose logs -f backend
 
-# Stop containers
-stop:
-	@echo "🛑 Stopping containers..."
-	@docker compose -f docker-compose.dev.yml down
+logs-frontend:
+	@echo "📜 Showing frontend logs..."
+	docker compose logs -f frontend
 
-# Clean up
+logs-db:
+	@echo "📜 Showing database logs..."
+	docker compose logs -f db
+
+# Cleanup
+down:
+	@echo "⬇️ Stopping all services..."
+	docker compose down
+
 clean:
 	@echo "🧹 Cleaning up containers and volumes..."
-	@docker compose -f docker-compose.dev.yml down -v
-	@docker system prune -f
+	docker compose down -v
+	docker system prune -f
 
-# Database shell
+clean-all:
+	@echo "🗑️ Removing everything (containers, volumes, images)..."
+	docker compose down -v
+	docker system prune -af
+	docker volume rm vibe-code-app_postgres_data 2>/dev/null || true
+	docker volume rm vibe-code-app_postgres_data_dev 2>/dev/null || true
+
+# Database utilities
 db-shell:
-	@echo "📊 Connecting to database..."
-	@docker compose -f docker-compose.dev.yml exec db psql -U filmuser -d film_collection_db
+	@echo "🐘 Opening database shell..."
+	docker compose exec db psql -U filmuser -d film_collection_db
 
-# Reset database
+db-backup:
+	@echo "💾 Creating database backup..."
+	docker compose exec db pg_dump -U filmuser film_collection_db > backup_$(shell date +%Y%m%d_%H%M%S).sql
+
+# Utility commands
+status:
+	@echo "📊 Checking service status..."
+	docker compose ps
+
+backend-shell:
+	@echo "🖥️ Connecting to backend container..."
+	docker compose exec backend sh
+
 db-reset:
-	@echo "⚠️  WARNING: This will destroy all database data!"
+	@echo "⚠️ WARNING: This will destroy all database data!"
 	@read -p "Are you sure? [y/N] " -n 1 -r && echo && \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		docker compose -f docker-compose.dev.yml down -v && \
-		docker compose -f docker-compose.dev.yml up -d db && \
+		docker compose down -v && \
+		docker compose up -d db && \
 		echo "✅ Database reset complete!"; \
 	fi
-
-# Backend shell
-backend-shell:
-	@echo "🖥️  Connecting to backend container..."
-	@docker compose -f docker-compose.dev.yml exec backend sh
-
-# Check service status
-status:
-	@docker compose -f docker-compose.dev.yml ps

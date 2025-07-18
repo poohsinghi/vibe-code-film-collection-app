@@ -1,53 +1,60 @@
 # Film Collection App
 
-A modern mobile application for managing your film collection, built with Expo React Native and Node.js.
+A modern mobile application for managing your film collection, built with Expo React Native, Node.js, and PostgreSQL.
 
-## Features
+## 🎬 Features
 
-- 🎬 Search films from IMDB database
-- 📱 Add films to your personal watchlist
-- ⭐ Rate and review watched films
-- 🎯 Get personalized film recommendations
-- 📊 Track your watching statistics
-- 🎨 Beautiful, responsive UI with Tailwind CSS
+- **Film Search** - Search films from IMDB database with manual search button
+- **Personal Watchlist** - Add films to your personal collection
+- **User Authentication** - Secure login and registration
+- **Clean UI** - Beautiful, responsive interface with Tailwind CSS and SafeAreaView
+- **Type Safety** - Full TypeScript implementation across frontend and backend
 
-## Tech Stack
+## 🚀 Tech Stack
 
 ### Frontend (Mobile App)
-- **Expo** - React Native framework
-- **TypeScript** - Type safety
-- **React Navigation** - Navigation
-- **React Query** - Server state management
-- **Zustand** - Local state management
+- **Expo** - React Native framework with TypeScript
+- **React Navigation** - App navigation
 - **NativeWind** - Tailwind CSS for React Native
-- **Axios** - HTTP client
+- **SafeAreaView** - Proper safe area handling for all screens
+- **Axios** - HTTP client for API communication
 
 ### Backend (API)
-- **Node.js** - Runtime
-- **Express** - Web framework
-- **TypeScript** - Type safety
-- **PostgreSQL** - Database
-- **JWT** - Authentication
+- **Node.js & Express** - RESTful API server with TypeScript
+- **Clean Architecture** - Controllers, Services, and Database layers
+- **Drizzle ORM** - Type-safe database operations
+- **PostgreSQL** - Relational database
+- **JWT Authentication** - Secure user sessions
 - **bcryptjs** - Password hashing
 
-### External APIs
-- **OMDB API** - Film data
-- **TMDB API** - Trending films and additional metadata
+### Database
+- **PostgreSQL** - Production database
+- **Drizzle ORM** - Type-safe SQL queries and migrations
+- **Schema Management** - Automated migrations and version control
 
-## Project Structure
+### External APIs
+- **OMDB API** - Film data and metadata
+
+## 📁 Project Structure
 
 ```
-├── mobile/                 # Expo React Native app
+├── frontend/               # Expo React Native app
 │   ├── src/
 │   │   ├── components/     # Reusable UI components
-│   │   ├── hooks/          # React Query hooks
-│   │   ├── navigation/     # Navigation configuration
-│   │   ├── screens/        # App screens
+│   │   ├── screens/        # App screens with SafeAreaView
 │   │   ├── services/       # API services
-│   │   └── store/          # Zustand stores
+│   │   └── types/          # TypeScript definitions
 │   ├── App.tsx
 │   └── package.json
 ├── backend/                # Express API server
+│   ├── src/
+│   │   ├── controllers/    # API route handlers
+│   │   ├── services/       # Business logic layer
+│   │   ├── database/       # Drizzle ORM setup and schema
+│   │   ├── middleware/     # Authentication and validation
+│   │   └── types/          # TypeScript definitions
+│   ├── drizzle/           # Database migrations
+│   └── package.json
 │   ├── src/
 │   │   ├── config/         # Database configuration
 │   │   ├── middleware/     # Express middleware
@@ -60,50 +67,108 @@ A modern mobile application for managing your film collection, built with Expo R
 
 ## Getting Started
 
+├── docker/                 # Docker configuration
+├── scripts/               # Setup and utility scripts
+├── docker-compose.yml     # Production Docker setup
+├── docker-compose.dev.yml # Development Docker setup
+├── Makefile              # Development commands
+└── README.md
+```
+
+## 🛠️ Setup & Installation
+
 ### Prerequisites
-- Node.js 18+ 
-- Docker & Docker Compose
-- Expo CLI
-- iOS Simulator / Android Emulator
+- **Node.js 18+** 
+- **Docker & Docker Compose**
+- **Expo CLI** - `npm install -g @expo/cli`
+- **iOS Simulator** / **Android Emulator**
 
-### Quick Start with Docker (Recommended)
+### 🚀 Quick Start (Recommended)
 
-1. **Clone and setup**:
-   ```bash
-   git clone <your-repo>
-   cd film-collection-app
-   ```
+#### Option 1: Fresh Installation
+```bash
+# Clone the repository
+git clone <your-repo>
+cd film-collection-app
 
-2. **Configure environment**:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys (see API Keys Setup section)
-   ```
+# Fresh setup (removes all existing data)
+make fresh
+```
 
-3. **Start with Docker**:
-   ```bash
-   # Using the setup script
-   ./scripts/dev-setup.sh
-   
-   # Or using Make
-   make dev
-   
-   # Or using Docker Compose directly
-   docker compose -f docker-compose.dev.yml up -d --build
-   ```
+#### Option 2: Setup with Existing Data
+```bash
+# Clone the repository
+git clone <your-repo>
+cd film-collection-app
 
-4. **Start the mobile app**:
-   ```bash
-   cd mobile
-   npm install
-   npx expo start
-   ```
+# Setup with existing database
+make setup
+```
 
-### Manual Setup (Without Docker)
+#### Option 3: Manual Docker Commands
+```bash
+# Start development environment
+make dev
+
+# Or using Docker Compose directly
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+### 📱 Mobile App Setup
+
+```bash
+# Install frontend dependencies
+cd frontend
+npm install
+
+# Start Expo development server
+npx expo start
+```
+
+### 🛠️ Development Commands
+
+```bash
+# Installation & Setup
+make install      # Install all dependencies
+make setup        # Setup with existing database
+make fresh        # Fresh installation (removes all data)
+
+# Development
+make dev          # Start development environment
+make logs         # Show all container logs
+make down         # Stop all services
+
+# Database Operations
+make migrate      # Run database migrations
+make db-shell     # Open database shell
+make db-backup    # Create database backup
+
+# Production
+make build        # Build production containers
+make up           # Start production environment
+```
+
+### 📊 Database Management
+
+The app uses **Drizzle ORM** for type-safe database operations:
+
+```bash
+# Run migrations
+cd backend
+npm run db:migrate
+
+# Generate new migration
+npm run db:generate
+
+# View database schema
+npm run db:studio
+```
+
+### Manual Setup (Alternative)
 
 #### Backend Setup
 
-1. Navigate to backend directory:
+1. **Navigate to backend directory:**
    ```bash
    cd backend
    ```

@@ -3,12 +3,12 @@ import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { connectDB } from './config/database';
+import { connectDB } from './db';
 import { errorHandler } from './middleware/errorHandler';
-import { authRoutes } from './routes/auth';
-import { filmRoutes } from './routes/films';
-import { userRoutes } from './routes/users';
-import { watchlistRoutes } from './routes/watchlist';
+import authRoutes from './routes/auth';
+import filmRoutes from './routes/films';
+import userRoutes from './routes/users';
+import watchlistRoutes from './routes/watchlist';
 
 dotenv.config();
 
@@ -40,9 +40,22 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await connectDB();
+    
+    // Run migrations in development (with error handling)
+    if (process.env.NODE_ENV !== 'production') {
+      try {
+        const { runMigrations } = await import('./db/migrate');
+        await runMigrations();
+      } catch (migrationError) {
+        console.warn('⚠️ Migration warning:', migrationError);
+        console.log('📋 Continuing with existing database schema...');
+      }
+    }
+    
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📱 Environment: ${process.env.NODE_ENV}`);
+      console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

@@ -15,7 +15,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
-      - ./backend/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # Removed init.sql to let Drizzle handle migrations
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U filmuser -d film_collection_db"]
       interval: 10s
